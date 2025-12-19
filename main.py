@@ -10,6 +10,8 @@ import os
 
 # --- KONFIGURACE PRO PRODUKCI ---
 from kivy.config import Config
+Config.set('graphics', 'fullscreen', 'auto')
+Config.set('graphics', 'show_cursor', '0')
 Config.set('kivy', 'exit_on_escape', '0')
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
 Config.set('kivy', 'log_level', 'error') # Logovat jen chyby pro výkon
@@ -63,7 +65,6 @@ class GalleryBlock(BoxLayout):
     img_source = StringProperty('')
     text_content = StringProperty('')
     click_action = ObjectProperty(None)
-    img_y_offset = NumericProperty(0)
 
 class AutoCloseBehavior:
     timer_event = None
@@ -222,7 +223,7 @@ class KarlovApp(App):
         if os.path.exists(kv_path):
             Builder.load_file(kv_path)
 
-        Window.show_coursor = False
+        Window.show_cursor = False
 
         self.sm = ScreenManager(transition=FadeTransition(duration=0.5))
         self.sm.add_widget(MainMenu(name='menu'))
@@ -233,7 +234,7 @@ class KarlovApp(App):
         self.sm.add_widget(SectionB3(name='section_b3'))
 
         Window.bind(on_motion=self.on_user_activity)                
-        self.reset_inactivity_timer
+        self.reset_inactivity_timer()
         return self.sm
         
 
