@@ -1,18 +1,17 @@
 """
 Název projektu: Poznejte Karlov (Interaktivní Kiosk)
 Autor: Tomáš Ungr
-Datum: Prosinec 2024
+Datum: Prosinec 2025
 Popis: Aplikace pro Raspberry Pi 5 prezentující historii čtvrti Karlov.
        Vytvořeno v frameworku Kivy.
 """
 
 import os
-import sys
 
 # --- KONFIGURACE PRO PRODUKCI ---
 from kivy.config import Config
 Config.set('kivy', 'exit_on_escape', '0')
-Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+Config.set('input', 'mouse', 'mouse,disable_multitouch')
 Config.set('kivy', 'log_level', 'error') # Logovat jen chyby pro výkon
 Config.write()
 # -----------------------------
@@ -21,7 +20,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import StringProperty, ListProperty, BooleanProperty, NumericProperty, ObjectProperty
+from kivy.properties import NumericProperty, StringProperty, ListProperty, BooleanProperty, ObjectProperty
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.clock import Clock
@@ -63,7 +62,8 @@ TEXT_B3B = "Na počátku sedmdesátých let 20. století bylo rozhodnuto o zást
 class GalleryBlock(BoxLayout):
     img_source = StringProperty('')
     text_content = StringProperty('')
-    click_action = ObjectProperty(None) 
+    click_action = ObjectProperty(None)
+    img_y_offset = NumericProperty(0)
 
 class AutoCloseBehavior:
     timer_event = None
@@ -212,20 +212,18 @@ class KarlovApp(App):
     INACTIVITY_TIMEOUT = 120  # 2 minuty
 
     def build(self):
-        # 1. REGISTRACE FONTŮ
         LabelBase.register(name='Roboto', 
                            fn_regular=resource_path('assets/fonts/Roboto-Regular.ttf'),
-                           fn_bold=resource_path('assets/fonts/Roboto-Bold.ttf'))
-
-        # 2. PRELOADING OBRÁZKŮ
+                           fn_bold=resource_path('assets/fonts/Roboto-Bold.ttf'))   
+        
         self.preload_images()
-
+        
         kv_path = resource_path('design.kv')
         if os.path.exists(kv_path):
             Builder.load_file(kv_path)
-        
-        Window.show_cursor = False 
-        
+
+        Window.show_coursor = False
+
         self.sm = ScreenManager(transition=FadeTransition(duration=0.5))
         self.sm.add_widget(MainMenu(name='menu'))
         self.sm.add_widget(SectionA(name='section_a'))
@@ -233,10 +231,11 @@ class KarlovApp(App):
         self.sm.add_widget(SectionB1(name='section_b1'))
         self.sm.add_widget(SectionB2(name='section_b2'))
         self.sm.add_widget(SectionB3(name='section_b3'))
-        
-        Window.bind(on_motion=self.on_user_activity)
-        self.reset_inactivity_timer()
+
+        Window.bind(on_motion=self.on_user_activity)                
+        self.reset_inactivity_timer
         return self.sm
+        
 
     def preload_images(self):
         """Načte klíčové obrázky do paměti při startu"""
